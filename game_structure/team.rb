@@ -30,6 +30,15 @@ class Team
     self
   end
 
+  def games
+    @losses + @wins
+  end
+
+  def reset!
+    @losses = 0
+    @wins = 0
+  end
+
   def winrate
     total = (wins + losses).to_f
     return 0.0 if total == 0.0
