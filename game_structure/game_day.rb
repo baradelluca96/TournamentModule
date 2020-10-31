@@ -23,7 +23,7 @@ class GameDay
 
   # Calculates how many games have a winner set, see Game class
   def games_played
-    games.inject(0) { |sum, game| sum + (game.winner ? 1 : 0) }
+    games.inject(0) { |sum, game| sum + (game.winner!=(:TBA) ? 1 : 0) }
   end
 
   def notify(obj, *args, &block)
