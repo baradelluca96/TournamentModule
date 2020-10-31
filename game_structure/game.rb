@@ -105,10 +105,8 @@ class Game
       value.win
       @loser = if team1 == value
                  team2.lose
-                 team1
                else
                  team1.lose
-                 team2
                end
     end
     update :result_set
@@ -116,12 +114,11 @@ class Game
   end
 
   def delete_result
-    if @winner
-      @winner.unwin
-      @loser.unlose
-    end
-    @winner = nil
-    @loser = nil
+    raise "No result yet" if @winner == :TBA
+    @winner.unwin
+    @loser.unlose
+    @winner = :TBA
+    @loser = :TBA
     update :result_deleted
     true
   end

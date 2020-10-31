@@ -28,12 +28,19 @@ class RoundRobin < TournamentMode
     result
   end
 
-  def add_tiebreak(game)
-    @game_days << GameDay.new(@game_days.last.day + 1, [game], name: "Tie-break")
+  def add_tiebreak(game, name = nil)
+    p @game_days.last.day
+    tiebreak = GameDay.new(@game_days.last.day, [game], name: (name || "Tie-break")) # AGGIUNGERE NOME CUSTOM
+    @game_days << tiebreak
+
+    define_singleton_method "day_#{tiebreak.day}" do
+      tiebreak
+    end
   end
 
   def build_tiebreaks
     leaderboard = get_leaderboard
+    tiebreak_index = 1
     while leaderboard.size > 0
       places_teams = leaderboard.select { |t| t.winrate == leaderboard[-1].winrate }
       leaderboard -= places_teams
@@ -41,13 +48,37 @@ class RoundRobin < TournamentMode
       when 1
       when 2
         tiebreak = Game.new(places_teams[0], places_teams[1])
-        @game_days << GameDay.new(game_days.last.day, [tiebreak], name: "Tiebreak")
+        game_day = GameDay.new(game_days.last.day, [tiebreak], name: "Tiebreak - Section #{tiebreak_index}")
+        @game_days << game_day
+
+        define_singleton_method "day_#{@game_days.last.day}" do
+          game_day
+        end
       else
-        tiebreak = RoundRobin.new(places_teams, start_day: @game_days.last.day, name: "Tiebreak Round Robin")
+        tiebreak = RoundRobin.new(places_teams, start_day: @game_days.last.day, name: "Tiebreak Round Robin - Section #{tiebreak_index}")
         @game_days += tiebreak.game_days
+
+        tiebreak.game_days.each do |game_day|
+          define_singleton_method "day_#{game_day.day}" do
+            game_day
+          end
+        end
       end
+
+      tiebreak_index += 1
     end
     self
+  end
+
+  def sample_execution
+    game_days.each do |day|
+      day.games.each do |game|
+        game.winner = [:team1, :team2].sample unless game.is_rest
+      end
+    end
+  end
+
+  def reset!
   end
 
   private
