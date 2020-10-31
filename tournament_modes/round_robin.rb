@@ -28,8 +28,9 @@ class RoundRobin < TournamentMode
     result
   end
 
-  def add_tiebreak(game)
-    tiebreak = GameDay.new(@game_days.last.day + 1, [game], name: "Tie-break") # ERRORE SUL NUMERO DEL GIORNO + AGGIUNGERE NOME CUSTOM
+  def add_tiebreak(game, name = nil)
+    p @game_days.last.day
+    tiebreak = GameDay.new(@game_days.last.day, [game], name: (name || "Tie-break")) # AGGIUNGERE NOME CUSTOM
     @game_days << tiebreak
 
     define_singleton_method "day_#{tiebreak.day}" do
@@ -67,6 +68,17 @@ class RoundRobin < TournamentMode
       tiebreak_index += 1
     end
     self
+  end
+
+  def sample_execution
+    game_days.each do |day|
+      day.games.each do |game|
+        game.winner = [:team1, :team2].sample unless game.is_rest
+      end
+    end
+  end
+
+  def reset!
   end
 
   private
