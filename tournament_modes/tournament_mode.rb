@@ -22,5 +22,31 @@ class TournamentMode
     @group.leaderbord_list(**args)
   end
 
+  def solve(&choose_winner)
+    @game_days.each do |day|
+      day.games.each do |game|
+        yield(game) unless (game.is_rest || game.played?)
+      end
+    end
+  end
+
+  def solved?
+    @game_days.all?{|day| day.games.all?{|game| game.played?}}
+  end
+
+  ATTRIBUTED_TEAM_RESOLVE = ->(game){
+    if game.team1.ability > game.team2.ability
+      game.winner = :team1
+    elsif game.team2.ability > game.team1.ability
+      game.winner = :team2
+    else
+      game.winner = [:team1, :team2].sample
+    end
+  }
+
+  STANDARD_RESOLVE = ->(game){
+    game.winner = [:team1, :team2].sample
+  }
+
   alias_method :schedule, :formatted
 end
