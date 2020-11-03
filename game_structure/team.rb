@@ -97,7 +97,7 @@ class Team
 
   class Group
     include Enumerable
-    attr_reader :group_type, :teams
+    attr_reader :group_type
     attr_accessor :name
     def initialize(elements = [], name: nil)
       is_teams_group = elements.all?{|t| t.is_a? Team}
@@ -123,10 +123,6 @@ class Team
 
     def each
       @teams.each {|t| yield t}
-    end
-
-    def check_type(element_type)
-      raise "Need an element of type #{group_type}" if element_type != group_type
     end
 
     def [](val)
@@ -237,6 +233,11 @@ class Team
     end
 
     private
+
+    def check_type(element_type)
+      raise "Need an element of type #{group_type}" if element_type != group_type
+    end
+
     # Used to align the name with the longest in group
     def fix_max_name_length
       max_length = @teams.sort_by{|team| team.name.length}.last.name.length
