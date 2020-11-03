@@ -29,8 +29,7 @@ class RoundRobin < TournamentMode
   end
 
   def add_tiebreak(game, name = nil)
-    p @game_days.last.day
-    tiebreak = GameDay.new(@game_days.last.day, [game], name: (name || "Tie-break")) # AGGIUNGERE NOME CUSTOM
+    tiebreak = GameDay.new(@game_days.last.day, [game], name: (name || "Tie-break"))
     @game_days << tiebreak
 
     define_singleton_method "day_#{tiebreak.day}" do
@@ -54,6 +53,7 @@ class RoundRobin < TournamentMode
         define_singleton_method "day_#{@game_days.last.day}" do
           game_day
         end
+        tiebreak_index += 1
       else
         tiebreak = RoundRobin.new(places_teams, start_day: @game_days.last.day, name: "Tiebreak Round Robin - Section #{tiebreak_index}")
         @game_days += tiebreak.game_days
@@ -63,9 +63,8 @@ class RoundRobin < TournamentMode
             game_day
           end
         end
+        tiebreak_index += 1
       end
-
-      tiebreak_index += 1
     end
     self
   end
