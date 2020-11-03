@@ -1,6 +1,7 @@
 # Represents a single
 class Team
   require_relative '../modules/kolorized'
+  require_relative 'attributed_team'
 
   attr_reader :wins, :losses
   attr_accessor :name
@@ -45,8 +46,8 @@ class Team
     (wins / total).to_f.round(4) * 100
   end
 
-  def stats
-    "#{name}".purple + " | " + "W: ".green + "#{wins}".green.bold + " - " + "L: ".red + "#{losses}".red.bold + " - " + "Winrate: ".orange + "#{"%.2f" % winrate}%\n".orange.bold
+  def stats(arg = nil)
+    "#{name}".purple + " | " + "W: ".green + "#{wins}".green.bold + " - " + "L: ".red + "#{losses}".red.bold + " - " + "Winrate: ".orange + "#{"%.2f" % winrate}%".orange.bold + "#{(arg == :block_new_line) ? "" : "\n"}"
   end
 
   def to_h
@@ -99,9 +100,9 @@ class Team
     attr_reader :group_type, :teams
     attr_accessor :name
     def initialize(elements = [], name: nil)
-      is_teams_group = elements.all?{|t| t.class == Team}
-      is_groups_group = elements.all?{|g| g.class == Group}
-      raise "Se an array of Teams or Groups" unless is_teams_group || is_groups_group
+      is_teams_group = elements.all?{|t| t.is_a? Team}
+      is_groups_group = elements.all?{|g| g.is_a? Group}
+      raise "Required an array of Teams or Groups" unless is_teams_group || is_groups_group
       if is_teams_group
         class << self
           attr_reader :teams
@@ -139,12 +140,15 @@ class Team
 
 
     def add(element)
+      team_descendant = ->(val){%w[Team AttributedTeam].include? val}
       case element.class.name
-      when "Team"
+      when team_descendant
         check_type(Team)
         raise "Rest already added" if @teams.include?(REST) && element == REST
         names = @teams.map(&:name)
-        raise "Duplicated name #{element.name}" if names.include?(element.name)
+        unless element.is_proxy?
+          raise "Duplicated name #{element.name}" if names.include?(element.name)
+        end
         @teams << element
         fix_max_name_length
       when "Team::Group"

@@ -113,6 +113,14 @@ class Game
     true
   end
 
+  def played?
+    unless is_rest
+      winner != :TBA
+    else
+      true
+    end
+  end
+
   def delete_result
     raise "No result yet" if @winner == :TBA
     @winner.unwin
